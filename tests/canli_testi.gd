@@ -25,7 +25,7 @@ func _initialize() -> void:
 	a.katilan.connect(func(id, bilgi): if id == b.kimlik: sonuc["katilan"] = true)
 	a.mesaj_geldi.connect(func(olay, veri, kimden): if olay == "g" and kimden == b.kimlik and veri.get("deneme") == 61: sonuc["mesaj"] = true)
 	a.ayrilan.connect(func(id): if id == b.kimlik: sonuc["ayrilan"] = true)
-	_rpc()
+	_rpc.call_deferred()
 
 
 func _rpc() -> void:
