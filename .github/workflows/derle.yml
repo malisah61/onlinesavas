@@ -1,0 +1,137 @@
+name: Derle (Android + Web) ve test et
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  GODOT_VERSION: "4.3"
+
+concurrency:
+  group: derle
+  cancel-in-progress: true
+
+jobs:
+  derle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Godot ve dışa aktarım şablonları (önbellek)
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot
+            ~/.local/share/godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}-stable
+
+      - name: Godot indir
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          cd ~/godot
+          wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          unzip -q Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip && mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 godot && rm *.zip
+          wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          unzip -q Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          mv templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/ && rm -rf templates *.tpz
+
+      - name: Sprite Atölye çıktılarını hafiflet (128 px sayfa → oyun sürümü)
+        run: |
+          pip install --quiet pillow
+          python3 tools/kucult.py
+          du -sh assets/sprites/k64 assets/uretilen 2>/dev/null || true
+
+      - name: Projeyi içe aktar
+        run: |
+          chmod +x ~/godot/godot
+          ~/godot/godot --headless --import >/dev/null 2>&1 || true
+          ~/godot/godot --headless --quit-after 3 2>&1 | grep -E "SCRIPT ERROR|Parse Error" && exit 1 || true
+
+      - name: Ağ testi (kurucu ↔ istemci, JSON gidiş-dönüş, kurucu devri)
+        run: ~/godot/godot --headless -s res://tests/ag_testi.gd
+
+      - name: Bot testi (8 bot, 3 maç)
+        run: ~/godot/godot --headless -s res://tests/bot_testi.gd -- --mac=3 --sure=240
+
+      - name: Canlı sunucu testi (Supabase Realtime + RPC)
+        continue-on-error: true
+        run: timeout 60 ~/godot/godot --headless -s res://tests/canli_testi.gd
+
+      - name: Ekran görüntüleri (xvfb)
+        continue-on-error: true
+        run: |
+          sudo apt-get install -y -qq xvfb libgl1-mesa-dri >/dev/null 2>&1 || true
+          timeout 180 xvfb-run -a -s "-screen 0 1280x720x24" ~/godot/godot --rendering-driver opengl3 --resolution 1280x720 -s res://tests/ekran.gd || true
+          ls -la docs/ekran || true
+
+      - name: Web derlemesi
+        run: |
+          mkdir -p build/web
+          ~/godot/godot --headless --export-release "Web" build/web/index.html
+          ls -la build/web
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Android APK derlemesi
+        run: |
+          keytool -genkeypair -v -keystore debug.keystore -storepass android -alias androiddebugkey \
+            -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          for f in editor_settings-4.tres editor_settings-4.3.tres; do
+            mkdir -p ~/.config/godot
+            printf '[gd_resource type="EditorSettings" format=3]\n\n[resource]\nexport/android/android_sdk_path = "%s"\nexport/android/java_sdk_path = "%s"\n' "$ANDROID_SDK_ROOT" "$JAVA_HOME" > ~/.config/godot/$f
+          done
+          export GODOT_ANDROID_KEYSTORE_DEBUG_PATH="$PWD/debug.keystore"
+          export GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey
+          export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android
+          export GODOT_ANDROID_KEYSTORE_RELEASE_PATH="$PWD/debug.keystore"
+          export GODOT_ANDROID_KEYSTORE_RELEASE_USER=androiddebugkey
+          export GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD=android
+          mkdir -p build/android
+          ~/godot/godot --headless --export-release "Android" build/android/onlinesavas.apk
+          ls -la build/android
+
+      - name: Boyut ve sürüm notu
+        run: |
+          {
+            echo "Otomatik derleme: ${{ github.sha }}"
+            echo
+            echo "- APK: $(du -h build/android/onlinesavas.apk | cut -f1)"
+            echo "- Web: $(du -sh build/web | cut -f1)"
+            echo "- Oyna (web): https://malisah61.github.io/onlinesavas/"
+            echo
+            cat docs/BOT_RAPORU.md
+          } > build/surum_notu.md
+
+      - name: Web'i GitHub Pages'e yayınla (gh-pages dalı)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: build/web
+          publish_branch: gh-pages
+          force_orphan: true
+
+      - name: APK'yı son-surum olarak yayınla
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: son-surum
+          name: Online Savaş - son sürüm
+          body_path: build/surum_notu.md
+          files: build/android/onlinesavas.apk
+          make_latest: true
+
+      - name: Bot raporu ve ekran görüntülerini depoya yaz
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898732+github-actions[bot]@users.noreply.github.com"
+          git add docs/BOT_RAPORU.md docs/ekran/*.png 2>/dev/null || true
+          git commit -qm "Bot raporu + ekran görüntüleri [skip ci]" || exit 0
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done

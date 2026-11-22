@@ -1,0 +1,35 @@
+{
+ "aciklama": "Sprite Atölye sipariş listesi. Sprite Atölye → Actions → 'Sipariş (oyun repolarına toplu asset)' → hedef: malisah61/onlinesavas. 'hat: komando' olanlar 3D + UAL iskeleti ile 8 yön × 8 animasyon sayfası olur (assets/sprites/<ad>_sprite_sheet.png); derleme bunları tools/kucult.py ile oyunun hafif sürümüne çevirir. Diğerleri assets/uretilen/ altına tek görsel olarak gelir; oyun dosya varsa onu, yoksa kodla çizileni kullanır.",
+ "siparisler": [
+  {"ad": "amerikan_er", "tur": "karakter", "stil": "other", "hat": "komando", "ekipman": ["rifle", "webbing", "canteen", "helmet"],
+   "tarif": "WWII American GI infantry soldier, olive drab M1943 field jacket, khaki trousers, brown leather boots, M1 steel helmet with net, ammunition belt", "seed": 11},
+  {"ad": "ingiliz_keskin", "tur": "karakter", "stil": "other", "hat": "komando", "ekipman": ["rifle", "belt", "cap"],
+   "tarif": "WWII British sniper soldier, camouflage Denison smock in green and brown, dark trousers, wool cap, face camouflage paint", "seed": 12},
+  {"ad": "alman_mg", "tur": "dusman", "stil": "other", "hat": "komando", "ekipman": ["rifle", "webbing", "helmet"],
+   "tarif": "WWII German machine gunner soldier, field grey uniform, Stahlhelm helmet, ammunition belts across the chest, black boots", "seed": 13},
+
+  {"ad": "kum_torbasi", "tur": "esya", "stil": "other", "cikti": "assets/uretilen/kum_torbasi.png",
+   "tarif": "top-down view of a straight wall of stacked burlap sandbags, military fortification, seen from directly above, game prop", "seed": 21},
+  {"ad": "sandik", "tur": "esya", "stil": "other", "cikti": "assets/uretilen/sandik.png",
+   "tarif": "top-down view of a wooden military supply crate with metal corners, seen from directly above, game prop", "seed": 22},
+  {"ad": "tank_enkazi", "tur": "esya", "stil": "other", "cikti": "assets/uretilen/tank_enkazi.png",
+   "tarif": "top-down view of a burned out destroyed WWII tank wreck, rusty dark metal, seen from directly above, game prop", "seed": 23},
+  {"ad": "agac", "tur": "esya", "stil": "other", "cikti": "assets/uretilen/agac.png",
+   "tarif": "top-down view of a single leafy green oak tree crown, seen from directly above, game prop", "seed": 24},
+
+  {"ad": "ikon_saglik", "tur": "ikon", "stil": "other", "cikti": "assets/uretilen/ikon_saglik.png",
+   "tarif": "WWII military first aid kit icon, olive canvas bag with red cross, game item icon", "seed": 31},
+  {"ad": "ikon_cephane", "tur": "ikon", "stil": "other", "cikti": "assets/uretilen/ikon_cephane.png",
+   "tarif": "WWII military ammunition box icon, green metal ammo can, game item icon", "seed": 32},
+  {"ad": "ikon_bomba", "tur": "ikon", "stil": "other", "cikti": "assets/uretilen/ikon_bomba.png",
+   "tarif": "WWII pineapple hand grenade icon, olive green, game item icon", "seed": 33},
+  {"ad": "ikon_tufek", "tur": "ikon", "stil": "other", "cikti": "assets/uretilen/ikon_tufek.png",
+   "tarif": "single WWII bolt action rifle with wooden stock, side view, game weapon icon", "seed": 34},
+  {"ad": "ikon_makineli", "tur": "ikon", "stil": "other", "cikti": "assets/uretilen/ikon_makineli.png",
+   "tarif": "single WWII submachine gun with drum magazine and wooden stock, side view, game weapon icon", "seed": 35},
+  {"ad": "ikon_keskin", "tur": "ikon", "stil": "other", "cikti": "assets/uretilen/ikon_keskin.png",
+   "tarif": "single WWII sniper rifle with telescopic scope, side view, game weapon icon", "seed": 36},
+  {"ad": "ikon_agir", "tur": "ikon", "stil": "other", "cikti": "assets/uretilen/ikon_agir.png",
+   "tarif": "single WWII light machine gun with bipod, side view, game weapon icon", "seed": 37}
+ ]
+}
