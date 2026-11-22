@@ -1,6 +1,6 @@
 # Bot testi raporu
 
-Tarih: 2026-11-22T22:02:08 — 3 maç, maç başı en çok 240 sn (8 bot, 4'e 4). Süre: 11.1 sn gerçek.
+Tarih: 2026-11-22T22:07:33 — 3 maç, maç başı en çok 240 sn (8 bot, 4'e 4). Süre: 13.5 sn gerçek.
 
 | Maç | Harita | Skor (Müt–Mih) | Süre | Öldürme | Atış (isabet) | Bomba | Takılma | Sınıf öldürme [Piy, Mak, Kes, Ağır] |
 |---|---|---|---|---|---|---|---|---|
